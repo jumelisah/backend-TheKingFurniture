@@ -46,7 +46,7 @@ exports.createProductCategory = async (req, res) => {
         id_category: req.body.id_category,
       },
     });
-    if (checkProductCategory) {
+    if (checkProductCategory.length > 0) {
       return responseHandler(res, 400, 'Product category already exist', null, null);
     }
     const productCategory = await ProductCategory.create(req.body);
