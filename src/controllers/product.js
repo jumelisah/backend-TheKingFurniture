@@ -1,6 +1,7 @@
 const Sequelize = require('sequelize');
 const responseHandler = require('../helpers/responseHandler');
 const Product = require('../models/product');
+const ProductCategory = require('../models/productCategory');
 
 const { APP_URL } = process.env;
 
@@ -24,6 +25,10 @@ exports.getAllProduct = async (req, res) => {
   });
   const offset = (page - 1) * limit;
   const results = await Product.findAll({
+    include: [
+      { model: ProductCategory },
+      // { model: ProductCategory, as: 'categories' },
+    ],
     where: {
       name: {
         [Sequelize.Op.like]: `%${search}%`,

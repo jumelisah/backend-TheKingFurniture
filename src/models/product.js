@@ -1,5 +1,6 @@
 const Sequelize = require('sequelize');
 const sequelize = require('../helpers/sequelize');
+const ProductCategory = require('./productCategory');
 
 const Product = sequelize.define('product', {
   name: {
@@ -74,5 +75,8 @@ const Product = sequelize.define('product', {
     type: Sequelize.BOOLEAN,
   },
 });
+
+Product.hasMany(ProductCategory, { foreignKey: 'id_product' });
+// Product.belongsTo(ProductCategory, { foreignKey: 'id_product', constraints: false });
 
 module.exports = Product;
