@@ -9,6 +9,7 @@ routes.use('/product-image', require('./productImage'));
 routes.use('/transaction', require('./transaction'));
 routes.use('/payment-method', require('./paymentMethod'));
 routes.use('/color', require('./color'));
+routes.use('/color-product', require('./colorProduct'));
 
 routes.get('/', (req, res) => responseHandler(res, 200, 'Backend is running well!'));
 
