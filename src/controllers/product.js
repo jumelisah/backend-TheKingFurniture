@@ -51,6 +51,11 @@ exports.getAllProduct = async (req, res) => {
 
 exports.createProduct = async (req, res) => {
   try {
+    // const { idCategory } = req.body;
+    // const listIdCategory = idCategory.split(' ');
+    // if (listIdCategory.length < 1) {
+    //   return responseHandler(res, 400, 'Please enter at least 1 category', null, null);
+    // }
     const product = await Product.create(req.body);
     return responseHandler(res, 200, 'Product created', product);
   } catch (e) {
