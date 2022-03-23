@@ -7,15 +7,6 @@ const { passwordValidation } = require('../helpers/validator');
 const User = sequelize.define('user', {
   name: {
     type: Sequelize.STRING,
-    allowNull: false,
-    validate: {
-      notNull: {
-        msg: 'Name cannot be null!',
-      },
-      notEmpty: {
-        msg: 'Name cannot be empty!',
-      },
-    },
   },
   email: {
     type: Sequelize.STRING,
@@ -73,8 +64,17 @@ User.beforeValidate((user) => {
 
 User.beforeCreate(async (user) => {
   const hash = await argon.hash(user.password);
+  if (user.password.length < 95) {
   // eslint-disable-next-line no-param-reassign
-  user.password = hash;
+    user.password = hash;
+  }
+});
+User.beforeUpdate(async (user) => {
+  const hash = await argon.hash(user.password);
+  if (user.password.length < 95) {
+  // eslint-disable-next-line no-param-reassign
+    user.password = hash;
+  }
 });
 
 User.belongsTo(Role, {

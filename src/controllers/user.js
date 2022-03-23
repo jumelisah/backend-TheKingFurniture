@@ -1,19 +1,47 @@
 const Sequelize = require('sequelize');
+const { pageInfo } = require('../helpers/pageInfo');
 const responseHandler = require('../helpers/responseHandler');
 const User = require('../models/user');
 
 exports.getAllUsers = async (req, res) => {
   try {
-    const { search = '' } = req.query;
+    let { search, page, limit } = req.query;
+    search = search || '';
+    page = parseInt(page, 10) || 1;
+    limit = parseInt(limit, 10) || 5;
+    const offset = (page - 1) * limit;
+    const data = { search, limit };
+
+    const resultsCount = await User.findAll({
+      where: {
+        is_deleted: false,
+      },
+    });
+
+    const totalData = resultsCount.length;
     const results = await User.findAll({
       where: {
         is_deleted: false,
-        name: {
-          [Sequelize.Op.like]: `${search}%`,
-        },
+        // name: {
+        //   [Sequelize.Op.like]: `${search}%`,
+        // },
       },
+      limit,
+      offset,
     });
-    return responseHandler(res, 200, 'List all users', results);
+
+    let queryParams = '';
+    // eslint-disable-next-line no-restricted-syntax
+    for (const key in data) {
+      if (Object.prototype.hasOwnProperty.call(data, key)) {
+        if (data[key]) {
+          queryParams += `${key}=${data[key]}&`;
+        }
+      }
+    }
+    const dataPageInfo = pageInfo(totalData, limit, page, 'user', queryParams);
+
+    return responseHandler(res, 200, 'List all users', results, dataPageInfo);
   } catch (e) {
     return responseHandler(res, 400, 'error', e);
   }
