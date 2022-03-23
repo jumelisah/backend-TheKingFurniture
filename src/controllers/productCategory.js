@@ -56,15 +56,6 @@ exports.createProductCategory = async (req, res) => {
   }
 };
 
-// exports.productDetail = async (req, res) => {
-//   const { id } = req.params;
-//   const product = await Product.findByPk(id);
-//   if (product && product.is_deleted === false) {
-//     return responseHandler(res, 200, 'Product detail', product, null);
-//   }
-//   return responseHandler(res, 404, 'Product not found', null, null);
-// };
-
 exports.updateProductCategory = async (req, res) => {
   try {
     const { id } = req.params;
