@@ -3,6 +3,7 @@ const responseHandler = require('../helpers/responseHandler');
 
 routes.use('/category', require('./category'));
 routes.use('/role', require('./role'));
+routes.use('/size', require('./size'));
 routes.use('/transaction-status', require('./transactionStatus'));
 routes.use('/product', require('./product'));
 routes.use('/category', require('./category'));
