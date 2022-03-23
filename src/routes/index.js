@@ -2,6 +2,8 @@ const routes = require('express').Router();
 const responseHandler = require('../helpers/responseHandler');
 
 routes.use('/category', require('./category'));
+routes.use('/role', require('./role'));
+routes.use('/transaction-status', require('./transactionStatus'));
 routes.use('/product', require('./product'));
 routes.use('/category', require('./category'));
 routes.use('/product-category', require('./productCategory'));
