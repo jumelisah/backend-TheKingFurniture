@@ -4,6 +4,7 @@ const responseHandler = require('../helpers/responseHandler');
 routes.use('/category', require('./category'));
 routes.use('/role', require('./role'));
 routes.use('/transaction-status', require('./transactionStatus'));
+routes.use('/tag', require('./tag'));
 
 routes.get('/', (req, res) => responseHandler(res, 200, 'Backend is running well!'));
 
