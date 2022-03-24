@@ -7,6 +7,7 @@ const Category = require('../models/category');
 const Product = require('../models/product');
 const ProductCategory = require('../models/productCategory');
 const ProductImage = require('../models/productImage');
+const User = require('../models/user');
 
 const { APP_URL } = process.env;
 
@@ -17,7 +18,7 @@ exports.getAllProduct = async (req, res) => {
   } = req.query;
   minPrice = parseInt(minPrice, 10) || 0;
   maxPrice = parseInt(maxPrice, 10) || 100000000;
-  limit = parseInt(limit, 10) || 20;
+  limit = parseInt(limit, 10) || 10;
   page = parseInt(page, 10) || 1;
   const dataName = ['search', 'minPrice', 'maxPrice'];
   const data = { search, minPrice, maxPrice };
@@ -32,7 +33,10 @@ exports.getAllProduct = async (req, res) => {
   const results = await Product.findAll({
     include: [
       { model: ProductCategory },
-      { model: ProductImage },
+      {
+        model: ProductImage,
+        attributes: ['image'],
+      },
     ],
     where: {
       name: {
@@ -63,11 +67,50 @@ exports.getAllProduct = async (req, res) => {
   return responseHandler(res, 200, 'List of products', results, pageInfo);
 };
 
+exports.getProductBySeller = async (req, res) => {
+  try {
+    const id = req.params.seller_id;
+    const seller = await User.findAll({
+      where: {
+        id,
+        id_role: 2,
+      },
+    });
+    if (!seller || seller.length < 1) {
+      return responseHandler(res, 404, 'Seller not found');
+    }
+    const product = await Product.findAll({
+      where: {
+        seller_id: id,
+        is_deleted: 0,
+      },
+    });
+    if (product.length > 0) {
+      return responseHandler(res, 200, 'Product list', product, null);
+    }
+    return responseHandler(res, 200, 'Seller has no product yet', null, null);
+  } catch {
+    return responseHandler(res, 500, 'Unexpected error');
+  }
+};
+
 exports.createProduct = async (req, res) => {
   try {
     const listIdCategory = req.body.id_category.split(',');
     if (listIdCategory.length < 1) {
       return responseHandler(res, 400, 'Please enter at least 1 category', null, null);
+    }
+    const seller = await User.findAll({
+      where: {
+        id: req.body.seller_id,
+        id_role: 2,
+      },
+    });
+    if (!seller || seller.length < 1) {
+      if (req.files) {
+        deleteImages(req.files);
+      }
+      return responseHandler(res, 404, 'Seller not found');
     }
     const product = await Product.create(req.body);
     const data = { id_product: product.dataValues.id };
@@ -108,12 +151,16 @@ exports.createProduct = async (req, res) => {
 };
 
 exports.productDetail = async (req, res) => {
-  const { id } = req.params;
-  const product = await Product.findByPk(id);
-  if (product && product.is_deleted === false) {
-    return responseHandler(res, 200, 'Product detail', product, null);
+  try {
+    const { id } = req.params;
+    const product = await Product.findByPk(id);
+    if (product && product.is_deleted === false) {
+      return responseHandler(res, 200, 'Product detail', product, null);
+    }
+    return responseHandler(res, 404, 'Product not found', null, null);
+  } catch {
+    return responseHandler(res, 500, 'Unexpected error');
   }
-  return responseHandler(res, 404, 'Product not found', null, null);
 };
 
 exports.updateProduct = async (req, res) => {

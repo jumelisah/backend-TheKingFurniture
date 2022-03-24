@@ -72,6 +72,10 @@ const Product = sequelize.define('product', {
       },
     },
   },
+  seller_id: {
+    type: Sequelize.INTEGER,
+    allowNull: false,
+  },
   is_deleted: {
     type: Sequelize.BOOLEAN,
     defaultValue: 0,
