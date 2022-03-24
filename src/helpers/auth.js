@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const responseHandler = require('./responseHandler');
+const Role = require('../models/role');
 
 const { APP_SECRET } = process.env;
 
@@ -23,4 +24,43 @@ exports.verifyUser = (req, res, next) => {
     }
   }
   return responseHandler(res, 401, 'Please login first!');
+};
+
+exports.checkIsAdmin = async (req, res, next) => {
+  const idRole = req.user.role;
+
+  const role = await Role.findByPk(idRole);
+  if (!role) {
+    return responseHandler(res, 500, 'Unexpected Error');
+  }
+  if (role.name !== 'Admin') {
+    return responseHandler(res, 403, 'You are not authorized to do this action!');
+  }
+  return next();
+};
+
+exports.checkIsSeller = async (req, res, next) => {
+  const idRole = req.user.role;
+
+  const role = await Role.findByPk(idRole);
+  if (!role) {
+    return responseHandler(res, 500, 'Unexpected Error');
+  }
+  if (role.name !== 'Seller') {
+    return responseHandler(res, 403, 'You are not authorized to do this action!');
+  }
+  return next();
+};
+
+exports.checkIsCustomer = async (req, res, next) => {
+  const idRole = req.user.role;
+
+  const role = await Role.findByPk(idRole);
+  if (!role) {
+    return responseHandler(res, 500, 'Unexpected Error');
+  }
+  if (role.name !== 'Customer') {
+    return responseHandler(res, 403, 'You are not authorized to do this action!');
+  }
+  return next();
 };

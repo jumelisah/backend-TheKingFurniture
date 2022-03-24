@@ -35,7 +35,7 @@ exports.login = async (req, res) => {
   if (await argon.verify(results[0].dataValues.password, data.password)) {
     const authData = {
       id: results[0].id,
-      role: results[0].role,
+      role: results[0].id_role,
     };
     const token = jwt.sign(authData, APP_SECRET);
     return responseHandler(res, 200, 'Login success!', [token]);
