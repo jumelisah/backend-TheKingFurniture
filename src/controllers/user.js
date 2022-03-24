@@ -97,6 +97,17 @@ exports.deleteUser = async (req, res) => {
   const { id } = req.params;
   const user = await User.findByPk(id);
   if (user) {
+    user.is_deleted = true;
+    await user.save();
+    return responseHandler(res, 200, 'User Deleted!');
+  }
+  return responseHandler(res, 404, 'User not found!');
+};
+
+exports.hardDeleteUser = async (req, res) => {
+  const { id } = req.params;
+  const user = await User.findByPk(id);
+  if (user) {
     await user.destroy();
     return responseHandler(res, 200, 'User Deleted!');
   }

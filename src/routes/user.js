@@ -1,11 +1,13 @@
 const user = require('express').Router();
 
 const userController = require('../controllers/user');
+const { verifyUser, checkIsAdmin } = require('../helpers/auth');
 
 user.get('/', userController.getAllUsers);
-user.post('/', userController.createUser);
-user.patch('/:id', userController.updateUser);
+user.post('/', verifyUser, checkIsAdmin, userController.createUser);
+user.patch('/:id', verifyUser, checkIsAdmin, userController.updateUser);
 user.get('/:id', userController.detailUser);
-user.delete('/:id', userController.deleteUser);
+user.patch('/delete/:id', verifyUser, checkIsAdmin, userController.deleteUser);
+user.delete('/:id', verifyUser, checkIsAdmin, userController.hardDeleteUser);
 
 module.exports = user;
