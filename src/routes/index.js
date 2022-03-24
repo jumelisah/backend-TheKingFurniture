@@ -14,6 +14,7 @@ routes.use('/delivery-method', require('./deliveryMethod'));
 routes.use('/user', require('./user'));
 routes.use('/product-category', require('./productCategory'));
 routes.use('/delivery-method', require('./deliveryMethod'));
+routes.use('/tag', require('./tag'));
 
 routes.get('/', (req, res) => responseHandler(res, 200, 'Backend is running well!'));
 
