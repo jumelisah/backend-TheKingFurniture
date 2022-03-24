@@ -35,6 +35,7 @@ exports.addImage = async (req, res) => {
     const images = req.files;
     const product = await Product.findByPk(req.body.id_product);
     if (!product || product.dataValues.is_deleted) {
+      deleteImages(images);
       return responseHandler(res, 400, 'Product not found', null, null);
     }
     const productImages = await ProductImage.findAll({
@@ -63,7 +64,7 @@ exports.addImage = async (req, res) => {
     if (req.files) {
       deleteImages(req.files);
     }
-    return responseHandler(res, 400, 'Can\'t create product category', e, null);
+    return responseHandler(res, 400, 'Can\'t create product image', e, null);
   }
 };
 

@@ -19,6 +19,9 @@ const storage = new CloudinaryStorage({
       if (baseUrl === '/profile') {
         baseUrl = '/user';
       }
+      if (baseUrl === '/product-image') {
+        baseUrl = '/product';
+      }
       return `TheKingFurniture/uploads/${baseUrl}`;
     },
     format: async () => 'png',
