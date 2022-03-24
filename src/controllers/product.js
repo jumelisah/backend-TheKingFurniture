@@ -171,8 +171,18 @@ exports.deleteProduct = async (req, res) => {
     });
     if (productImage) {
       productImage.map(async (data) => {
-        await data.destroy();
         deleteFile(cloudPathToFileName(data.image));
+        await data.destroy();
+      });
+    }
+    const productCategory = await ProductCategory.findAll({
+      where: {
+        id_product: id,
+      },
+    });
+    if (productCategory) {
+      productCategory.map(async (data) => {
+        await data.destroy();
       });
     }
     return responseHandler(res, 200, 'Product was deleted', null, null);

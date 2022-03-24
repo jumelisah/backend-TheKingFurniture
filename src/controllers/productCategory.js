@@ -30,6 +30,19 @@ exports.getAllProductCategory = async (req, res) => {
   return responseHandler(res, 200, 'List of product Categories', results, pageInfo);
 };
 
+exports.getCategoryByProduct = async (req, res) => {
+  try {
+    const roductCategory = await ProductCategory.findAll({
+      where: {
+        id_product: req.params.id_product,
+      },
+    });
+    return responseHandler(res, 200, 'Category list', roductCategory);
+  } catch (e) {
+    return responseHandler(res, 500, e);
+  }
+};
+
 exports.createProductCategory = async (req, res) => {
   try {
     const product = await Product.findByPk(req.body.id_product);
