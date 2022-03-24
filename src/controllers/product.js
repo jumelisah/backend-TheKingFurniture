@@ -3,6 +3,7 @@ const { cloudPathToFileName } = require('../helpers/converter');
 const { deleteImages } = require('../helpers/deleteArrayImages');
 const { deleteFile } = require('../helpers/fileHandler');
 const responseHandler = require('../helpers/responseHandler');
+const Category = require('../models/category');
 const Product = require('../models/product');
 const ProductCategory = require('../models/productCategory');
 const ProductImage = require('../models/productImage');
@@ -16,7 +17,7 @@ exports.getAllProduct = async (req, res) => {
   } = req.query;
   minPrice = parseInt(minPrice, 10) || 0;
   maxPrice = parseInt(maxPrice, 10) || 100000000;
-  limit = parseInt(limit, 10) || 5;
+  limit = parseInt(limit, 10) || 20;
   page = parseInt(page, 10) || 1;
   const dataName = ['search', 'minPrice', 'maxPrice'];
   const data = { search, minPrice, maxPrice };
@@ -46,7 +47,11 @@ exports.getAllProduct = async (req, res) => {
     limit,
     offset,
   });
-  const count = await Product.count();
+  const count = await Product.count({
+    where: {
+      is_deleted: 0,
+    },
+  });
   const last = Math.ceil(count / limit);
   const pageInfo = {
     prev: page > 1 ? `${url}page=${page - 1}&limit=${limit}` : null,
@@ -60,11 +65,10 @@ exports.getAllProduct = async (req, res) => {
 
 exports.createProduct = async (req, res) => {
   try {
-    // const { idCategory } = req.body;
-    // const listIdCategory = idCategory.split(' ');
-    // if (listIdCategory.length < 1) {
-    //   return responseHandler(res, 400, 'Please enter at least 1 category', null, null);
-    // }
+    const listIdCategory = req.body.id_category.split(',');
+    if (listIdCategory.length < 1) {
+      return responseHandler(res, 400, 'Please enter at least 1 category', null, null);
+    }
     const product = await Product.create(req.body);
     const data = { id_product: product.dataValues.id };
     if (req.files) {
@@ -77,6 +81,14 @@ exports.createProduct = async (req, res) => {
         }
       });
     }
+    listIdCategory.forEach(async (x) => {
+      const getCategory = await Category.findByPk(x);
+      if (!getCategory) {
+        return responseHandler(res, 404, 'Category not found');
+      }
+      data.id_category = x;
+      const productCategory = await ProductCategory.create(data);
+    });
     const getProduct = await Product.findAll({
       include: [
         { model: ProductImage },
