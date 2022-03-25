@@ -1,5 +1,10 @@
+const Sequelize = require('sequelize');
+const { cloudPathToFileName } = require('../helpers/converter');
+const { deleteFile } = require('../helpers/fileHandler');
 const { pageInfo } = require('../helpers/pageInfo');
 const responseHandler = require('../helpers/responseHandler');
+const { inputValidator } = require('../helpers/validator');
+const Role = require('../models/role');
 const User = require('../models/user');
 
 exports.getAllUsers = async (req, res) => {
@@ -57,9 +62,56 @@ exports.detailUser = async (req, res) => {
 
 exports.createUser = async (req, res) => {
   try {
-    const user = await User.create(req.body);
+    const fillable = [
+      {
+        field: 'name', required: false, type: 'varchar', max_length: 100,
+      },
+      {
+        field: 'email', required: true, type: 'email',
+      },
+      {
+        field: 'password', required: true, type: 'password',
+      },
+      {
+        field: 'gender', required: false, type: 'enum', options: ['male', 'female'],
+      },
+      {
+        field: 'email', required: false, type: 'email',
+      },
+      {
+        field: 'store_name', required: false, type: 'varchar', max_length: 100,
+      },
+      {
+        field: 'store_description', required: false, type: 'text',
+      },
+      {
+        field: 'id_role', required: false, type: 'integer',
+      },
+    ];
+    const { error, data } = inputValidator(req, fillable);
+    if (data.id_role) {
+      const role = await Role.findByPk(data.id_role);
+      if (!role) {
+        error.push('Role not found!');
+      }
+    }
+    if (error.length > 0) {
+      if (req.files) {
+        deleteFile(req.files);
+      }
+      return responseHandler(res, 400, error);
+    }
+    if (req.files) {
+      req.files.forEach(async (pic) => {
+        data.picture = pic.path;
+      });
+    }
+    const user = await User.create(data);
     return responseHandler(res, 201, 'User created!', user);
   } catch (e) {
+    if (req.files) {
+      deleteFile(req.files);
+    }
     let error = e.message;
     if (Array.isArray(e.errors)) {
       error = e.errors.map((err) => ({ field: err.path, message: err.message }));
@@ -72,18 +124,71 @@ exports.updateUser = async (req, res) => {
   try {
     const { id } = req.params;
     const user = await User.findByPk(id);
-    if (user) {
-      // eslint-disable-next-line no-restricted-syntax
-      for (const key in req.body) {
-        if (Object.prototype.hasOwnProperty.call(req.body, key)) {
-          user[key] = req.body[key];
-        }
+    if (!user) {
+      if (req.files) {
+        deleteFile(req.files);
       }
-      await user.save();
-      return responseHandler(res, 200, 'User updated!', user);
+      return responseHandler(res, 404, 'User not found!');
     }
-    return responseHandler(res, 404, 'User not found!');
+    const fillable = [
+      {
+        field: 'name', required: false, type: 'varchar', max_length: 100,
+      },
+      {
+        field: 'email', required: false, type: 'email',
+      },
+      {
+        field: 'password', required: false, type: 'password',
+      },
+      {
+        field: 'gender', required: false, type: 'enum', options: ['male', 'female'],
+      },
+      {
+        field: 'email', required: false, type: 'email',
+      },
+      {
+        field: 'store_name', required: false, type: 'varchar', max_length: 100,
+      },
+      {
+        field: 'store_description', required: false, type: 'text',
+      },
+      {
+        field: 'id_role', required: false, type: 'integer',
+      },
+    ];
+    const { error, data } = inputValidator(req, fillable);
+    if (data.id_role) {
+      const role = await Role.findByPk(data.id_role);
+      if (!role) {
+        error.push('Role not found!');
+      }
+    }
+    if (error.length > 0) {
+      if (req.files) {
+        deleteFile(req.files);
+      }
+      return responseHandler(res, 400, error);
+    }
+
+    if (req.files) {
+      deleteFile(cloudPathToFileName(user.picture));
+      req.files.forEach(async (pic) => {
+        data.picture = pic.path;
+      });
+    }
+
+    // eslint-disable-next-line no-restricted-syntax
+    for (const key in data) {
+      if (Object.prototype.hasOwnProperty.call(data, key)) {
+        user[key] = data[key];
+      }
+    }
+    await user.save();
+    return responseHandler(res, 200, 'User updated!', user);
   } catch (e) {
+    if (req.files) {
+      deleteFile(req.files);
+    }
     let error = e.message;
     if (Array.isArray(e.errors)) {
       error = e.errors.map((err) => ({ field: err.path, message: err.message }));
