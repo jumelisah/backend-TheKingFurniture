@@ -1,5 +1,7 @@
 const Sequelize = require('sequelize');
 const sequelize = require('../helpers/sequelize');
+const ProductCategory = require('./productCategory');
+const ProductImage = require('./productImage');
 
 const Product = sequelize.define('product', {
   name: {
@@ -70,9 +72,18 @@ const Product = sequelize.define('product', {
       },
     },
   },
+  seller_id: {
+    type: Sequelize.INTEGER,
+    allowNull: false,
+  },
   is_deleted: {
     type: Sequelize.BOOLEAN,
+    defaultValue: 0,
   },
 });
+
+Product.hasMany(ProductCategory, { foreignKey: 'id_product' });
+Product.hasMany(ProductImage, { foreignKey: 'id_product' });
+// Product.hasMany(ColorProduct, { foreignKey: 'id_product' });
 
 module.exports = Product;
