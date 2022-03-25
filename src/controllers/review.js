@@ -21,11 +21,11 @@ exports.getAllReviews = async (req, res) => {
           model: Product,
           attributes: ['name'],
         },
-        // {
-        //   model: Review,
-        //   attributes: ['id', 'id_user', 'content'],
-        //   as: 'Reply',
-        // },
+        {
+          model: Review,
+          attributes: ['id', 'id_user', 'content'],
+          as: 'Reply',
+        },
       ],
     });
     return responseHandler(res, 200, 'List all reviews', results);

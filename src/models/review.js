@@ -61,9 +61,10 @@ Review.belongsTo(Product, {
 });
 
 Review.belongsTo(Review, {
+  as: 'Reply',
   foreignKey: {
     name: 'id_parent',
-    as: 'Reply',
+    // as: 'Reply',
   },
 });
 
