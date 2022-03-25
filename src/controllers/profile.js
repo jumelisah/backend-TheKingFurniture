@@ -3,6 +3,8 @@ const responseHandler = require('../helpers/responseHandler');
 const User = require('../models/user');
 const Role = require('../models/role');
 const { comparePassword, inputValidator } = require('../helpers/validator');
+const { cloudPathToFileName } = require('../helpers/converter');
+const { deleteFile } = require('../helpers/fileHandler');
 
 exports.getProfile = async (req, res) => {
   try {
@@ -25,6 +27,61 @@ exports.getProfile = async (req, res) => {
       ],
     });
     return responseHandler(res, 200, 'Profile data', results);
+  } catch (e) {
+    let error = e.message;
+    if (Array.isArray(e.errors)) {
+      error = e.errors.map((err) => ({ field: err.path, message: err.message }));
+    }
+    return responseHandler(res, 400, 'error', error);
+  }
+};
+
+exports.updateProfile = async (req, res) => {
+  try {
+    const { id } = req.user;
+    const fillable = [
+      {
+        field: 'name', required: false, type: 'varchar', max_length: 100,
+      },
+      {
+        field: 'gender', required: false, type: 'enum', options: ['male', 'female'],
+      },
+      {
+        field: 'email', required: false, type: 'email',
+      },
+      {
+        field: 'store_name', required: false, type: 'varchar', max_length: 100,
+      },
+      {
+        field: 'store_description', required: false, type: 'text',
+      },
+    ];
+    const { error, data } = inputValidator(req, fillable);
+    if (error.length > 0) {
+      if (req.files) {
+        deleteFile(req.files);
+      }
+      return responseHandler(res, 400, error);
+    }
+
+    const user = await User.findByPk(id);
+
+    if (req.files) {
+      deleteFile(cloudPathToFileName(user.picture));
+      req.files.forEach(async (pic) => {
+        data.picture = pic.path;
+      });
+    }
+
+    // eslint-disable-next-line no-restricted-syntax
+    for (const key in data) {
+      if (Object.prototype.hasOwnProperty.call(data, key)) {
+        user[key] = data[key];
+      }
+    }
+
+    await user.save();
+    return responseHandler(res, 200, 'Profile updated!');
   } catch (e) {
     let error = e.message;
     if (Array.isArray(e.errors)) {
