@@ -1,3 +1,4 @@
+const { APP_URL } = process.env;
 const Transaction = require('../models/transaction');
 const responseHandler = require('../helpers/responseHandler');
 const Product = require('../models/product');
@@ -7,12 +8,67 @@ const DeliveryMethod = require('../models/deliveryMethod');
 
 exports.getAllTransaction = async (req, res) => {
   try {
+    let { limit, page } = req.body;
+    limit = parseInt(limit, 10) || 12;
+    page = parseInt(page, 10) || 1;
+    const url = `${APP_URL}/transaction?`;
+    const offset = (page - 1) * limit;
     const transaction = await Transaction.findAll({
       where: {
         is_deleted: 0,
       },
+      limit,
+      offset,
     });
-    return responseHandler(res, 200, 'List of all transactions', transaction, null);
+    const count = await Transaction.count({
+      where: {
+        is_deleted: 0,
+      },
+    });
+    const last = Math.ceil(count / limit);
+    const pageInfo = {
+      prev: page > 1 ? `${url}page=${page - 1}&limit=${limit}` : null,
+      next: page < last ? `${url}page=${page + 1}&limit=${limit}` : null,
+      totalData: count,
+      currentPage: page,
+      lastPage: last,
+    };
+    return responseHandler(res, 200, 'List of all transactions', transaction, pageInfo);
+  } catch (e) {
+    return responseHandler(res, 500, 'Error', e, null);
+  }
+};
+
+exports.getTransactionByUser = async (req, res) => {
+  try {
+    let { limit, page } = req.body;
+    limit = parseInt(limit, 10) || 12;
+    page = parseInt(page, 10) || 1;
+    const url = `${APP_URL}/transaction/user?`;
+    const offset = (page - 1) * limit;
+    const transaction = await Transaction.findAll({
+      where: {
+        id_user: req.user.id,
+        is_deleted: 0,
+      },
+      limit,
+      offset,
+    });
+    const count = await Transaction.count({
+      where: {
+        id_user: req.user.id,
+        is_deleted: 0,
+      },
+    });
+    const last = Math.ceil(count / limit);
+    const pageInfo = {
+      prev: page > 1 ? `${url}page=${page - 1}&limit=${limit}` : null,
+      next: page < last ? `${url}page=${page + 1}&limit=${limit}` : null,
+      totalData: count,
+      currentPage: page,
+      lastPage: last,
+    };
+    return responseHandler(res, 200, 'List of all transactions', transaction, pageInfo);
   } catch (e) {
     return responseHandler(res, 500, 'Error', e, null);
   }

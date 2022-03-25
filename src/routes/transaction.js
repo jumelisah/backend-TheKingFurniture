@@ -1,10 +1,11 @@
 const transaction = require('express').Router();
 const {
-  getAllTransaction, addTransaction, updateTransaction, deleteTransaction,
+  getAllTransaction, addTransaction, updateTransaction, deleteTransaction, getTransactionByUser,
 } = require('../controllers/transaction');
-const { verifyUser } = require('../helpers/auth');
+const { verifyUser, checkIsAdmin } = require('../helpers/auth');
 
-transaction.get('/', verifyUser, getAllTransaction);
+transaction.get('/', verifyUser, checkIsAdmin, getAllTransaction);
+transaction.get('/user', verifyUser, getTransactionByUser);
 transaction.post('/', verifyUser, addTransaction);
 transaction.patch('/', verifyUser, updateTransaction);
 transaction.patch('/:id', verifyUser, updateTransaction);
