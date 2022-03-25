@@ -1,3 +1,5 @@
+/* eslint-disable consistent-return */
+/* eslint-disable array-callback-return */
 const Sequelize = require('sequelize');
 
 const { APP_URL } = process.env;
