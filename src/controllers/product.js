@@ -6,7 +6,6 @@ const { deleteImages } = require('../helpers/deleteArrayImages');
 const { deleteFile } = require('../helpers/fileHandler');
 const responseHandler = require('../helpers/responseHandler');
 const Category = require('../models/category');
-const ColorProduct = require('../models/colorProduct');
 const Product = require('../models/product');
 const ProductCategory = require('../models/productCategory');
 const ProductImage = require('../models/productImage');
@@ -77,7 +76,7 @@ exports.getAllProduct = async (req, res) => {
     currentPage: page,
     lastPage: last,
   };
-  return responseHandler(res, 200, 'List of products', results.rows, pageInfo);
+  return responseHandler(res, 200, 'List of products', results, pageInfo);
 };
 
 exports.getProductBySeller = async (req, res) => {
