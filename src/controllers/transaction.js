@@ -1,3 +1,5 @@
+const Sequelize = require('sequelize');
+
 const { APP_URL } = process.env;
 const Transaction = require('../models/transaction');
 const responseHandler = require('../helpers/responseHandler');
@@ -49,6 +51,9 @@ exports.getTransactionByUser = async (req, res) => {
     const transaction = await Transaction.findAll({
       where: {
         id_user: req.user.id,
+        id_transaction_status: {
+          [Sequelize.Op.gte]: 2,
+        },
         is_deleted: 0,
       },
       limit,
@@ -57,6 +62,46 @@ exports.getTransactionByUser = async (req, res) => {
     const count = await Transaction.count({
       where: {
         id_user: req.user.id,
+        id_transaction_status: {
+          [Sequelize.Op.gte]: 2,
+        },
+        is_deleted: 0,
+      },
+    });
+    const last = Math.ceil(count / limit);
+    const pageInfo = {
+      prev: page > 1 ? `${url}page=${page - 1}&limit=${limit}` : null,
+      next: page < last ? `${url}page=${page + 1}&limit=${limit}` : null,
+      totalData: count,
+      currentPage: page,
+      lastPage: last,
+    };
+    return responseHandler(res, 200, 'List of all transactions', transaction, pageInfo);
+  } catch (e) {
+    return responseHandler(res, 500, 'Error', e, null);
+  }
+};
+
+exports.getUserCart = async (req, res) => {
+  try {
+    let { limit, page } = req.body;
+    limit = parseInt(limit, 10) || 12;
+    page = parseInt(page, 10) || 1;
+    const url = `${APP_URL}/transaction/cart?`;
+    const offset = (page - 1) * limit;
+    const transaction = await Transaction.findAll({
+      where: {
+        id_user: req.user.id,
+        id_transaction_status: 1,
+        is_deleted: 0,
+      },
+      limit,
+      offset,
+    });
+    const count = await Transaction.count({
+      where: {
+        id_user: req.user.id,
+        id_transaction_status: 1,
         is_deleted: 0,
       },
     });
