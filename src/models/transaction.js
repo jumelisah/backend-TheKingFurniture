@@ -1,7 +1,15 @@
 const Sequelize = require('sequelize');
 const sequelize = require('../helpers/sequelize');
+const Product = require('./product');
 
 const Transaction = sequelize.define('transaction', {
+  id_product: {
+    type: Sequelize.INTEGER,
+    references: {
+      model: Product,
+      key: 'id',
+    },
+  },
   id_user: {
     type: Sequelize.INTEGER,
   },

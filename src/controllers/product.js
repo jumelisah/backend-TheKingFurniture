@@ -51,6 +51,9 @@ exports.getAllProduct = async (req, res) => {
         [Sequelize.Op.gte]: minPrice,
         [Sequelize.Op.lte]: maxPrice,
       },
+      stock: {
+        [Sequelize.Op.gte]: 1,
+      },
       is_deleted: 0,
     },
     limit,
@@ -127,6 +130,9 @@ exports.getProductBySeller = async (req, res) => {
         price: {
           [Sequelize.Op.gte]: minPrice,
           [Sequelize.Op.lte]: maxPrice,
+        },
+        stock: {
+          [Sequelize.Op.gte]: 1,
         },
         seller_id: id,
         is_deleted: 0,
@@ -222,8 +228,23 @@ exports.createProduct = async (req, res) => {
 exports.productDetail = async (req, res) => {
   try {
     const { id } = req.params;
-    const product = await Product.findByPk(id);
-    if (product && product.is_deleted === false) {
+    const product = await Product.findAll({
+      include: [
+        {
+          model: ProductCategory,
+          attributes: ['id_category'],
+        },
+        {
+          model: ProductImage,
+          attributes: ['image'],
+        },
+      ],
+      where: {
+        id,
+        is_deleted: 0,
+      },
+    });
+    if (product) {
       return responseHandler(res, 200, 'Product detail', product, null);
     }
     return responseHandler(res, 404, 'Product not found', null, null);
