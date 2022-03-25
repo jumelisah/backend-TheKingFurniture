@@ -18,6 +18,7 @@ routes.use('/payment-method', require('./paymentMethod'));
 routes.use('/color', require('./color'));
 routes.use('/color-product', require('./colorProduct'));
 routes.use('/profile', require('./profile'));
+routes.use('/review', require('./review'));
 routes.use('/tag', require('./tag'));
 
 routes.get('/', (req, res) => responseHandler(res, 200, 'Backend is running well!'));
