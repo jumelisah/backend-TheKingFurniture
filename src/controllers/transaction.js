@@ -119,6 +119,39 @@ exports.getUserCart = async (req, res) => {
   }
 };
 
+exports.getTransactionForSeller = async (req, res) => {
+  try {
+    const sellerTransaction = [];
+    const product = await Product.findAll({
+      where: {
+        seller_id: req.user.id,
+      },
+    });
+    const transaction = await Transaction.findAll({
+      wher: {
+        id_transaction_status: {
+          [Sequelize.Op.gte]: 2,
+          [Sequelize.Op.lte]: 5,
+        },
+      },
+    });
+    product.map((data) => {
+      transaction.map((history) => {
+        if (history.id_product === data.id) {
+          return sellerTransaction.push(history);
+        }
+      });
+    });
+    if (!sellerTransaction) {
+      return responseHandler(res, 200, 'You have no transaction');
+    }
+    sellerTransaction.reverse();
+    return responseHandler(res, 200, 'Transaction list', sellerTransaction, null);
+  } catch (e) {
+    return responseHandler(res, 400, 'Error', e, null);
+  }
+};
+
 exports.addTransaction = async (req, res) => {
   try {
     const product = await Product.findByPk(req.body.id_product);
