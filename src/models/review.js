@@ -60,11 +60,10 @@ Review.belongsTo(Product, {
   },
 });
 
-Review.belongsTo(Review, {
-  as: 'Reply',
+Review.hasMany(Review, {
+  as: 'Replies',
   foreignKey: {
     name: 'id_parent',
-    // as: 'Reply',
   },
 });
 

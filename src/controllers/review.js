@@ -24,7 +24,7 @@ exports.getAllReviews = async (req, res) => {
         {
           model: Review,
           attributes: ['id', 'id_user', 'content'],
-          as: 'Reply',
+          as: 'Replies',
         },
       ],
     });
@@ -42,6 +42,21 @@ exports.detailReview = async (req, res) => {
   const { id } = req.params;
   const review = await Review.findByPk(id, {
     attributes: ['id', 'id_user', 'id_product', 'content', 'id_parent'],
+    include: [
+      {
+        model: User,
+        attributes: ['name'],
+      },
+      {
+        model: Product,
+        attributes: ['name'],
+      },
+      {
+        model: Review,
+        attributes: ['id', 'id_user', 'content'],
+        as: 'Replies',
+      },
+    ],
   });
   if (review) {
     return responseHandler(res, 200, 'Review detail', review);
@@ -67,11 +82,11 @@ exports.getReviewsByProduct = async (req, res) => {
           model: Product,
           attributes: ['name'],
         },
-        // {
-        //   model: Review,
-        //   attributes: ['id', 'id_user', 'content'],
-        //   as: 'Reply',
-        // },
+        {
+          model: Review,
+          attributes: ['id', 'id_user', 'content'],
+          as: 'Replies',
+        },
       ],
     });
     return responseHandler(res, 200, `List reviews in product ${idProduct}`, results);
