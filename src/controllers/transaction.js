@@ -1,5 +1,6 @@
 const Transaction = require('../models/transaction');
 const responseHandler = require('../helpers/responseHandler');
+const Product = require('../models/product');
 
 exports.getAllTransaction = async (req, res) => {
   try {
@@ -16,7 +17,15 @@ exports.getAllTransaction = async (req, res) => {
 
 exports.addTransaction = async (req, res) => {
   try {
+    const product = await Product.findByPk(req.body.id_product);
+    if (!product || product.length < 1) {
+      return responseHandler(res, 404, 'Product not found');
+    }
     const transaction = await Transaction.create(req.body);
+    // if (req.body.id_transaction.status > 1) {
+    //   product.stock -= 1;
+    //   product
+    // }
     return responseHandler(res, 200, 'Successfully add transaction', transaction, null);
   } catch (e) {
     return responseHandler(res, 400, 'Error', e, null);
