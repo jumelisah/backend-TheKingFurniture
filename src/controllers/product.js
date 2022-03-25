@@ -244,7 +244,7 @@ exports.productDetail = async (req, res) => {
         is_deleted: 0,
       },
     });
-    if (product) {
+    if (product.length > 0) {
       return responseHandler(res, 200, 'Product detail', product, null);
     }
     return responseHandler(res, 404, 'Product not found', null, null);

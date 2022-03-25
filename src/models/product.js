@@ -45,7 +45,7 @@ const Product = sequelize.define('product', {
       isNumeric: {
         msg: 'Stock must be a number',
       },
-      min: 1,
+      min: 0,
     },
   },
   price: {
