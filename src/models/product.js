@@ -84,5 +84,6 @@ const Product = sequelize.define('product', {
 
 Product.hasMany(ProductCategory, { foreignKey: 'id_product' });
 Product.hasMany(ProductImage, { foreignKey: 'id_product' });
+// Product.hasMany(ColorProduct, { foreignKey: 'id_product' });
 
 module.exports = Product;

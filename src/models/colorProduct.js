@@ -6,12 +6,6 @@ const Product = require('./product');
 const ColorProduct = sequelize.define('color_product', {
   id_product: {
     type: Sequelize.INTEGER,
-    allowNull: false,
-    validate: {
-      notNull: {
-        msg: 'id_product cannot be null!',
-      },
-    },
     references: {
       model: Product,
       key: 'id',

@@ -6,6 +6,7 @@ const { deleteImages } = require('../helpers/deleteArrayImages');
 const { deleteFile } = require('../helpers/fileHandler');
 const responseHandler = require('../helpers/responseHandler');
 const Category = require('../models/category');
+const ColorProduct = require('../models/colorProduct');
 const Product = require('../models/product');
 const ProductCategory = require('../models/productCategory');
 const ProductImage = require('../models/productImage');
@@ -34,7 +35,10 @@ exports.getAllProduct = async (req, res) => {
   const offset = (page - 1) * limit;
   const results = await Product.findAll({
     include: [
-      { model: ProductCategory },
+      {
+        model: ProductCategory,
+        attributes: ['id_category'],
+      },
       {
         model: ProductImage,
         attributes: ['image'],
@@ -55,6 +59,13 @@ exports.getAllProduct = async (req, res) => {
   });
   const count = await Product.count({
     where: {
+      name: {
+        [Sequelize.Op.like]: `%${search}%`,
+      },
+      price: {
+        [Sequelize.Op.gte]: minPrice,
+        [Sequelize.Op.lte]: maxPrice,
+      },
       is_deleted: 0,
     },
   });
@@ -66,7 +77,7 @@ exports.getAllProduct = async (req, res) => {
     currentPage: page,
     lastPage: last,
   };
-  return responseHandler(res, 200, 'List of products', results, pageInfo);
+  return responseHandler(res, 200, 'List of products', results.rows, pageInfo);
 };
 
 exports.getProductBySeller = async (req, res) => {
@@ -81,6 +92,24 @@ exports.getProductBySeller = async (req, res) => {
     if (!seller || seller.length < 1) {
       return responseHandler(res, 404, 'Seller not found');
     }
+    const { search = '' } = req.query;
+    let {
+      minPrice, maxPrice, limit, page,
+    } = req.query;
+    minPrice = parseInt(minPrice, 10) || 0;
+    maxPrice = parseInt(maxPrice, 10) || 100000000;
+    limit = parseInt(limit, 10) || 10;
+    page = parseInt(page, 10) || 1;
+    const dataName = ['search', 'minPrice', 'maxPrice'];
+    const data = { search, minPrice, maxPrice };
+    let url = `${APP_URL}/product/seller/${id}?`;
+    dataName.forEach((x) => {
+      if (req.query[x]) {
+        data[x] = req.query[x];
+        url = `${url}${x}=${data[x]}&`;
+      }
+    });
+    const offset = (page - 1) * limit;
     const product = await Product.findAll({
       include: [
         {
@@ -93,12 +122,42 @@ exports.getProductBySeller = async (req, res) => {
         },
       ],
       where: {
+        name: {
+          [Sequelize.Op.like]: `%${search}%`,
+        },
+        price: {
+          [Sequelize.Op.gte]: minPrice,
+          [Sequelize.Op.lte]: maxPrice,
+        },
+        seller_id: id,
+        is_deleted: 0,
+      },
+      limit,
+      offset,
+    });
+    const count = await Product.count({
+      where: {
+        name: {
+          [Sequelize.Op.like]: `%${search}%`,
+        },
+        price: {
+          [Sequelize.Op.gte]: minPrice,
+          [Sequelize.Op.lte]: maxPrice,
+        },
         seller_id: id,
         is_deleted: 0,
       },
     });
+    const last = Math.ceil(count / limit);
+    const pageInfo = {
+      prev: page > 1 ? `${url}page=${page - 1}&limit=${limit}` : null,
+      next: page < last ? `${url}page=${page + 1}&limit=${limit}` : null,
+      totalData: count,
+      currentPage: page,
+      lastPage: last,
+    };
     if (product.length > 0) {
-      return responseHandler(res, 200, 'Product list', product, null);
+      return responseHandler(res, 200, 'Product list', product, pageInfo);
     }
     return responseHandler(res, 200, 'Seller has no product yet', null, null);
   } catch {
