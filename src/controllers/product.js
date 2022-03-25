@@ -1,3 +1,5 @@
+/* eslint-disable consistent-return */
+/* eslint-disable max-len */
 const Sequelize = require('sequelize');
 const { cloudPathToFileName } = require('../helpers/converter');
 const { deleteImages } = require('../helpers/deleteArrayImages');
@@ -80,6 +82,16 @@ exports.getProductBySeller = async (req, res) => {
       return responseHandler(res, 404, 'Seller not found');
     }
     const product = await Product.findAll({
+      include: [
+        {
+          model: ProductCategory,
+          attributes: ['id_category'],
+        },
+        {
+          model: ProductImage,
+          attributes: ['image'],
+        },
+      ],
       where: {
         seller_id: id,
         is_deleted: 0,
@@ -96,23 +108,22 @@ exports.getProductBySeller = async (req, res) => {
 
 exports.createProduct = async (req, res) => {
   try {
+    if (req.user.role !== 2) {
+      if (req.files) {
+        deleteImages(req.files);
+      }
+      return responseHandler(res, 401, 'You are not able to do this action');
+    }
     const listIdCategory = req.body.id_category.split(',');
     if (listIdCategory.length < 1) {
       return responseHandler(res, 400, 'Please enter at least 1 category', null, null);
     }
-    const seller = await User.findAll({
-      where: {
-        id: req.body.seller_id,
-        id_role: 2,
-      },
+    const dataProduct = {};
+    Object.keys(req.body).forEach((x) => {
+      dataProduct[x] = req.body[x];
     });
-    if (!seller || seller.length < 1) {
-      if (req.files) {
-        deleteImages(req.files);
-      }
-      return responseHandler(res, 404, 'Seller not found');
-    }
-    const product = await Product.create(req.body);
+    dataProduct.seller_id = req.user.id;
+    const product = await Product.create(dataProduct);
     const data = { id_product: product.dataValues.id };
     if (req.files) {
       req.files.forEach(async (pic) => {
@@ -173,9 +184,16 @@ exports.updateProduct = async (req, res) => {
       }
       return responseHandler(res, 404, 'Product not found', null, null);
     }
+    if (req.user.role !== 2 && req.user.id !== product.dataValues.seller_id) {
+      if (req.files) {
+        deleteImages(req.files);
+      }
+      return responseHandler(res, 401, 'You are not able to do this action');
+    }
     Object.keys(req.body).forEach((data) => {
       product[data] = req.body[data];
     });
+    product.seller_id = req.user.id;
     await product.save();
     const productImage = await ProductImage.findAll({
       where: {
@@ -206,23 +224,33 @@ exports.updateProduct = async (req, res) => {
 };
 
 exports.deleteProduct = async (req, res) => {
-  const { id } = req.params;
-  const product = await Product.findByPk(id);
-  if (product && product.dataValues.is_deleted === false) {
-    product.is_deleted = 1;
-    await product.save();
-    const productImage = await ProductImage.findAll({
-      where: {
-        id_product: id,
-      },
-    });
-    if (productImage) {
-      productImage.map(async (data) => {
-        await data.destroy();
-        deleteFile(cloudPathToFileName(data.image));
-      });
+  try {
+    const { id } = req.params;
+    const product = await Product.findByPk(id);
+    if (req.user.id !== product.dataValues.seller_id) {
+      return responseHandler(res, 401, 'You are not able to do this action');
     }
-    return responseHandler(res, 200, 'Product was deleted', null, null);
+    if (product && product.dataValues.is_deleted === false) {
+      product.is_deleted = 1;
+      await product.save();
+      const productImage = await ProductImage.findAll({
+        where: {
+          id_product: id,
+        },
+      });
+      if (productImage) {
+        productImage.map(async (data) => {
+          await data.destroy();
+          deleteFile(cloudPathToFileName(data.image));
+        });
+      }
+      return responseHandler(res, 200, 'Product was deleted', null, null);
+    }
+    return responseHandler(res, 404, 'Product not found', null, null);
+  } catch (e) {
+    if (req.files) {
+      deleteImages(req.files);
+    }
+    return responseHandler(res, 400, 'Can\'t delete', e, null);
   }
-  return responseHandler(res, 404, 'Product not found', null, null);
 };
