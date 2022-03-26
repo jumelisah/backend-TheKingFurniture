@@ -14,10 +14,15 @@ const User = require('../models/user');
 const { APP_URL } = process.env;
 
 exports.getAllProduct = async (req, res) => {
-  const { search = '' } = req.query;
+  const { search = '', orderBy = 1 } = req.query;
   let {
     minPrice, maxPrice, limit, page,
   } = req.query;
+  const listOrder = ['id DESC', 'id ASC', 'price DESC', 'price ASC'];
+  if (orderBy > listOrder.length) {
+    return responseHandler(res, 400, 'Wrong order');
+  }
+  const setOrder = listOrder[orderBy - 1].split(' ');
   minPrice = parseInt(minPrice, 10) || 0;
   maxPrice = parseInt(maxPrice, 10) || 100000000;
   limit = parseInt(limit, 10) || 10;
@@ -56,6 +61,9 @@ exports.getAllProduct = async (req, res) => {
       },
       is_deleted: 0,
     },
+    order: [
+      [setOrder[0], setOrder[1]],
+    ],
     limit,
     offset,
   });
@@ -85,6 +93,12 @@ exports.getAllProduct = async (req, res) => {
 exports.getProductBySeller = async (req, res) => {
   try {
     const id = req.params.seller_id;
+    const { orderBy = 1 } = req.query;
+    const listOrder = ['id DESC', 'id ASC', 'price DESC', 'price ASC'];
+    if (orderBy > listOrder.length) {
+      return responseHandler(res, 400, 'Wrong order');
+    }
+    const setOrder = listOrder[orderBy - 1].split(' ');
     const seller = await User.findAll({
       where: {
         id,
@@ -131,12 +145,12 @@ exports.getProductBySeller = async (req, res) => {
           [Sequelize.Op.gte]: minPrice,
           [Sequelize.Op.lte]: maxPrice,
         },
-        stock: {
-          [Sequelize.Op.gte]: 1,
-        },
         seller_id: id,
         is_deleted: 0,
       },
+      order: [
+        [setOrder[0], setOrder[1]],
+      ],
       limit,
       offset,
     });
@@ -244,7 +258,7 @@ exports.productDetail = async (req, res) => {
         is_deleted: 0,
       },
     });
-    if (product) {
+    if (product.length > 0) {
       return responseHandler(res, 200, 'Product detail', product, null);
     }
     return responseHandler(res, 404, 'Product not found', null, null);
