@@ -11,7 +11,7 @@ exports.getAllReviews = async (req, res) => {
       where: {
         id_parent: null,
       },
-      attributes: ['id', 'id_user', 'id_product', 'content', 'id_parent'],
+      attributes: ['id', 'id_user', 'id_product', 'rating', 'content', 'id_parent'],
       include: [
         {
           model: User,
@@ -41,7 +41,7 @@ exports.getAllReviews = async (req, res) => {
 exports.detailReview = async (req, res) => {
   const { id } = req.params;
   const review = await Review.findByPk(id, {
-    attributes: ['id', 'id_user', 'id_product', 'content', 'id_parent'],
+    attributes: ['id', 'id_user', 'id_product', 'rating', 'content', 'id_parent'],
     include: [
       {
         model: User,
@@ -72,7 +72,7 @@ exports.getReviewsByProduct = async (req, res) => {
         id_parent: null,
         id_product: idProduct,
       },
-      attributes: ['id', 'id_user', 'id_product', 'content', 'id_parent'],
+      attributes: ['id', 'id_user', 'id_product', 'rating', 'content', 'id_parent'],
       include: [
         {
           model: User,
@@ -105,6 +105,9 @@ exports.createReview = async (req, res) => {
     const fillable = [
       {
         field: 'id_product', required: true, type: 'integer',
+      },
+      {
+        field: 'rating', required: true, type: 'integer',
       },
       {
         field: 'content', required: true, type: 'text',
