@@ -56,6 +56,27 @@ exports.getFavoriteByUser = async (req, res) => {
   }
 };
 
+exports.getFavByUserAndProduct = async (req, res) => {
+  try {
+    const favorite = await FavoriteProduct.findAndCountAll({
+      where: {
+        id_user: req.user.id,
+        id_product: req.params.id,
+      },
+    });
+    if (favorite.length < 1) {
+      return responseHandler(res, 404, 'Data not found');
+    }
+    return responseHandler(res, 200, 'User favorite', favorite.rows, { totalData: favorite.count });
+  } catch (e) {
+    let errMessage = null;
+    if (e.length > 0) {
+      errMessage = e.errors.map((err) => ({ field: err.path, message: err.message }));
+    }
+    return responseHandler(res, 400, 'error', errMessage);
+  }
+};
+
 exports.createFavorite = async (req, res) => {
   try {
     const product = await Product.findByPk(req.body.id_product);
