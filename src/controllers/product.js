@@ -219,6 +219,7 @@ exports.createProduct = async (req, res) => {
         return responseHandler(res, 404, 'Category not found');
       }
       data.id_category = x;
+      // eslint-disable-next-line no-unused-vars
       const productCategory = await ProductCategory.create(data);
     });
     const getProduct = await Product.findAll({
