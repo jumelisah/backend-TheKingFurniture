@@ -33,7 +33,7 @@ exports.getAllWishlists = async (req, res) => {
 exports.detailWishlist = async (req, res) => {
   const { id } = req.params;
   const wishlist = await Wishlist.findByPk(id, {
-    attributes: ['id', 'id_user', 'id_product', 'content', 'id_parent'],
+    attributes: ['id', 'id_user', 'id_product'],
     include: [
       {
         model: User,
@@ -42,11 +42,6 @@ exports.detailWishlist = async (req, res) => {
       {
         model: Product,
         attributes: ['name'],
-      },
-      {
-        model: Wishlist,
-        attributes: ['id', 'id_user', 'content'],
-        as: 'Replies',
       },
     ],
   });
