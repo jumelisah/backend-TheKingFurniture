@@ -49,10 +49,12 @@ const Transaction = sequelize.define('transaction', {
   },
   id_payment_method: {
     type: Sequelize.INTEGER,
+    defaultValue: 1,
     allowNull: false,
   },
   id_delivery_method: {
     type: Sequelize.INTEGER,
+    defaultValue: 1,
     allowNull: false,
   },
   id_transaction_status: {
