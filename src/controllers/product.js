@@ -9,6 +9,7 @@ const Category = require('../models/category');
 const Product = require('../models/product');
 const ProductCategory = require('../models/productCategory');
 const ProductImage = require('../models/productImage');
+const Review = require('../models/review');
 const User = require('../models/user');
 
 const { APP_URL } = process.env;
@@ -243,7 +244,20 @@ exports.createProduct = async (req, res) => {
 exports.productDetail = async (req, res) => {
   try {
     const { id } = req.params;
-    const product = await Product.findAll({
+    const product = await Product.findByPk(id, {
+      attributes: [
+        'id',
+        'name',
+        'description',
+        'stock',
+        'price',
+        'condition',
+        'seller_id',
+        [
+          Sequelize.fn('AVG', Sequelize.col('ProductReviews.rating')), 'avgRating',
+        ],
+      ],
+
       include: [
         {
           model: ProductCategory,
@@ -253,17 +267,23 @@ exports.productDetail = async (req, res) => {
           model: ProductImage,
           attributes: ['image'],
         },
+        {
+          model: Review,
+          attributes: [],
+          as: 'ProductReviews',
+        },
       ],
       where: {
-        id,
         is_deleted: 0,
       },
+      group: ['id'],
     });
-    if (product.length > 0) {
+    if (product) {
       return responseHandler(res, 200, 'Product detail', product, null);
     }
     return responseHandler(res, 404, 'Product not found', null, null);
-  } catch {
+  } catch (e) {
+    console.log(e);
     return responseHandler(res, 500, 'Unexpected error');
   }
 };
