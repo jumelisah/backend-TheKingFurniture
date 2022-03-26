@@ -1,7 +1,7 @@
 const Sequelize = require('sequelize');
 const sequelize = require('../helpers/sequelize');
 const User = require('./user');
-const Product = require('./product');
+// const Product = require('./product');
 
 const Review = sequelize.define('review', {
   id_user: {
@@ -58,17 +58,11 @@ const Review = sequelize.define('review', {
 });
 
 Review.belongsTo(User, {
-  foreignKey: {
-    name: 'id_user',
-    allowNull: false,
-  },
+  foreignKey: 'id_user',
 });
-Review.belongsTo(Product, {
-  foreignKey: {
-    name: 'id_product',
-    allowNull: false,
-  },
-});
+// Review.belongsTo(Product, {
+//   foreignKey: 'id_product',
+// });
 
 Review.hasMany(Review, {
   as: 'Replies',
