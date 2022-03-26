@@ -24,6 +24,16 @@ const Review = sequelize.define('review', {
       min: 0,
     },
   },
+  rating: {
+    type: Sequelize.INTEGER,
+    validate: {
+      isNumeric: {
+        msg: 'Invalid rating format',
+      },
+      min: 1,
+      max: 5,
+    },
+  },
   content: {
     type: Sequelize.TEXT,
     allowNull: false,
