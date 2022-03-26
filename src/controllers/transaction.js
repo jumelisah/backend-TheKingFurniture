@@ -9,6 +9,7 @@ const Product = require('../models/product');
 const TransactionStatus = require('../models/transactionStatus');
 const PaymentMethod = require('../models/paymentMethod');
 const DeliveryMethod = require('../models/deliveryMethod');
+const ProductImage = require('../models/productImage');
 
 exports.getAllTransaction = async (req, res) => {
   try {
@@ -51,6 +52,14 @@ exports.getTransactionByUser = async (req, res) => {
     const url = `${APP_URL}/transaction/user?`;
     const offset = (page - 1) * limit;
     const transaction = await Transaction.findAll({
+      include: [
+        {
+          model: Product,
+          include: [
+            ProductImage,
+          ],
+        },
+      ],
       where: {
         id_user: req.user.id,
         id_transaction_status: {
@@ -92,6 +101,14 @@ exports.getUserCart = async (req, res) => {
     const url = `${APP_URL}/transaction/cart?`;
     const offset = (page - 1) * limit;
     const transaction = await Transaction.findAll({
+      include: [
+        {
+          model: Product,
+          include: [
+            ProductImage,
+          ],
+        },
+      ],
       where: {
         id_user: req.user.id,
         id_transaction_status: 1,
@@ -130,7 +147,15 @@ exports.getTransactionForSeller = async (req, res) => {
       },
     });
     const transaction = await Transaction.findAll({
-      wher: {
+      include: [
+        {
+          model: Product,
+          include: [
+            ProductImage,
+          ],
+        },
+      ],
+      where: {
         id_transaction_status: {
           [Sequelize.Op.gte]: 2,
           [Sequelize.Op.lte]: 5,
@@ -159,18 +184,6 @@ exports.addTransaction = async (req, res) => {
     const product = await Product.findByPk(req.body.id_product);
     if (!product || product.length < 1) {
       return responseHandler(res, 404, 'Product not found');
-    }
-    const transactionStatus = await TransactionStatus.findByPk(req.body.id_transaction_status);
-    if (!transactionStatus) {
-      return responseHandler(res, 404, 'Transaction status not found');
-    }
-    const paymentMethod = await PaymentMethod.findByPk(req.body.id_payment_method);
-    if (!paymentMethod) {
-      return responseHandler(res, 404, 'Payment method not found');
-    }
-    const deliveryMethod = await DeliveryMethod.findByPk(req.body.id_delivery_method);
-    if (!deliveryMethod) {
-      return responseHandler(res, 404, 'Delivery method not found');
     }
     if (req.body.id_transaction_status > 5) {
       return responseHandler(res, 400, 'You haven\'t made any transaction');
