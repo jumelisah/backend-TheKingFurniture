@@ -20,6 +20,7 @@ routes.use('/color-product', require('./colorProduct'));
 routes.use('/profile', require('./profile'));
 routes.use('/review', require('./review'));
 routes.use('/tag', require('./tag'));
+routes.use('/wishlist', require('./wishlist'));
 
 routes.get('/', (req, res) => responseHandler(res, 200, 'Backend is running well!'));
 
