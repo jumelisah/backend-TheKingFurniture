@@ -66,8 +66,10 @@ exports.updateProfile = async (req, res) => {
 
     const user = await User.findByPk(id);
 
-    if (req.files && user.picture) {
-      deleteFile(cloudPathToFileName(user.picture));
+    if (req.files) {
+      if (user.picture) {
+        deleteFile(cloudPathToFileName(user.picture));
+      }
       req.files.forEach(async (pic) => {
         data.picture = pic.path;
       });

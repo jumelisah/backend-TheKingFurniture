@@ -170,8 +170,10 @@ exports.updateUser = async (req, res) => {
       return responseHandler(res, 400, error);
     }
 
-    if (req.files && user.picture) {
-      deleteFile(cloudPathToFileName(user.picture));
+    if (req.files) {
+      if (user.picture) {
+        deleteFile(cloudPathToFileName(user.picture));
+      }
       req.files.forEach(async (pic) => {
         data.picture = pic.path;
       });
