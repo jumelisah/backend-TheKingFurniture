@@ -171,7 +171,9 @@ exports.updateUser = async (req, res) => {
     }
 
     if (req.files) {
-      deleteFile(cloudPathToFileName(user.picture));
+      if (user.picture) {
+        deleteFile(cloudPathToFileName(user.picture));
+      }
       req.files.forEach(async (pic) => {
         data.picture = pic.path;
       });
