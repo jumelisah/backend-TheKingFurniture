@@ -7,6 +7,7 @@ const Transaction = require('../models/transaction');
 const responseHandler = require('../helpers/responseHandler');
 const Product = require('../models/product');
 const ProductImage = require('../models/productImage');
+const TransactionStatus = require('../models/transactionStatus');
 
 exports.getAllTransaction = async (req, res) => {
   try {
@@ -152,6 +153,9 @@ exports.getTransactionForSeller = async (req, res) => {
           include: [
             ProductImage,
           ],
+        },
+        {
+          model: TransactionStatus,
         },
       ],
       where: {
