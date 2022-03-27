@@ -3,6 +3,7 @@ const sequelize = require('../helpers/sequelize');
 const ProductCategory = require('./productCategory');
 const ProductImage = require('./productImage');
 const Transaction = require('./transaction');
+const Review = require('./review');
 
 const Product = sequelize.define('product', {
   name: {
@@ -88,5 +89,10 @@ Product.hasMany(ProductImage, { foreignKey: 'id_product' });
 Product.hasMany(Transaction, { foreignKey: 'id_product' });
 Transaction.belongsTo(Product, { foreignKey: 'id_product' });
 // Product.hasMany(ColorProduct, { foreignKey: 'id_product' });
+Product.hasMany(Review, { foreignKey: 'id_product', as: 'ProductReviews' });
+
+Review.belongsTo(Product, {
+  foreignKey: 'id_product',
+});
 
 module.exports = Product;
