@@ -30,6 +30,47 @@ exports.getAllProductCategory = async (req, res) => {
   return responseHandler(res, 200, 'List of product Categories', results, pageInfo);
 };
 
+exports.getCategoryById = async (req, res) => {
+  try {
+    let { limit, page } = req.query;
+    limit = parseInt(limit, 10) || 5;
+    page = parseInt(page, 10) || 1;
+    const url = `${APP_URL}/product?`;
+    const offset = (page - 1) * limit;
+    const results = await ProductCategory.findAll({
+      where: {
+        id_category: req.params.id_category,
+        is_deleted: 0,
+      },
+      limit,
+      offset,
+    });
+    const count = await ProductCategory.count({
+      include: [
+        {
+          model: Product,
+          where: { is_deleted: 0 },
+        },
+      ],
+      where: {
+        id_category: req.params.id_category,
+        is_deleted: 0,
+      },
+    });
+    const last = Math.ceil(count / limit);
+    const pageInfo = {
+      prev: page > 1 ? `${url}page=${page - 1}&limit=${limit}` : null,
+      next: page < last ? `${url}page=${page + 1}&limit=${limit}` : null,
+      totalData: count,
+      currentPage: page,
+      lastPage: last,
+    };
+    return responseHandler(res, 200, 'List of product by category', results, pageInfo);
+  } catch (e) {
+    return responseHandler(res, 'Error', e);
+  }
+};
+
 exports.createProductCategory = async (req, res) => {
   try {
     const product = await Product.findByPk(req.body.id_product);

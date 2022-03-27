@@ -132,6 +132,9 @@ exports.getUserCart = async (req, res) => {
       currentPage: page,
       lastPage: last,
     };
+    if (transaction.length === 1) {
+      return responseHandler(res, 200, 'List of all transaction', [transaction], pageInfo);
+    }
     return responseHandler(res, 200, 'List of all transactions', transaction, pageInfo);
   } catch (e) {
     return responseHandler(res, 500, 'Error', e, null);
@@ -215,21 +218,6 @@ exports.updateTransaction = async (req, res) => {
   try {
     const { id } = req.params;
     const transaction = await Transaction.findByPk(id);
-    if (!transaction || transaction.dataValues.is_deleted) {
-      return responseHandler(res, 404, 'Data not found', null, null);
-    }
-    const transactionStatus = await TransactionStatus.findByPk(req.body.id_transaction_status);
-    if (!transactionStatus) {
-      return responseHandler(res, 404, 'Transaction status not found');
-    }
-    const paymentMethod = await PaymentMethod.findByPk(req.body.id_payment_method);
-    if (!paymentMethod) {
-      return responseHandler(res, 404, 'Payment method not found');
-    }
-    const deliveryMethod = await DeliveryMethod.findByPk(req.body.id_delivery_method);
-    if (!deliveryMethod) {
-      return responseHandler(res, 404, 'Delivery method not found');
-    }
     if (transaction.dataValues.id_transaction_status === 6) {
       return responseHandler(res, 400, 'You have been cancelled this transaction');
     }
@@ -270,7 +258,7 @@ exports.deleteTransaction = async (req, res) => {
     if (!transaction || transaction.dataValues.is_deleted) {
       return responseHandler(res, 404, 'Data not found', null, null);
     }
-    if (transaction.id_transaction_status < 5 || transaction.id_transaction_status < 1) {
+    if (transaction.id_transaction_status < 5 && transaction.id_transaction_status > 1) {
       return responseHandler(res, 400, 'You haven\'t finish or cancel your transaction.');
     }
     transaction.is_deleted = 1;
