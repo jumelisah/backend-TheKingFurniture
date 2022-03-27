@@ -6,9 +6,6 @@ const { APP_URL } = process.env;
 const Transaction = require('../models/transaction');
 const responseHandler = require('../helpers/responseHandler');
 const Product = require('../models/product');
-const TransactionStatus = require('../models/transactionStatus');
-const PaymentMethod = require('../models/paymentMethod');
-const DeliveryMethod = require('../models/deliveryMethod');
 const ProductImage = require('../models/productImage');
 
 exports.getAllTransaction = async (req, res) => {
@@ -96,7 +93,7 @@ exports.getTransactionByUser = async (req, res) => {
 exports.getUserCart = async (req, res) => {
   try {
     let { limit, page } = req.body;
-    limit = parseInt(limit, 10) || 12;
+    limit = parseInt(limit, 10) || 10;
     page = parseInt(page, 10) || 1;
     const url = `${APP_URL}/transaction/cart?`;
     const offset = (page - 1) * limit;
@@ -116,6 +113,9 @@ exports.getUserCart = async (req, res) => {
       },
       limit,
       offset,
+      order: [
+        ['id', 'DESC'],
+      ],
     });
     const count = await Transaction.count({
       where: {
@@ -144,15 +144,11 @@ exports.getUserCart = async (req, res) => {
 exports.getTransactionForSeller = async (req, res) => {
   try {
     const sellerTransaction = [];
-    const product = await Product.findAll({
-      where: {
-        seller_id: req.user.id,
-      },
-    });
     const transaction = await Transaction.findAll({
       include: [
         {
           model: Product,
+          where: { is_deleted: 0 },
           include: [
             ProductImage,
           ],
@@ -164,19 +160,15 @@ exports.getTransactionForSeller = async (req, res) => {
           [Sequelize.Op.lte]: 5,
         },
       },
+      order: [
+        ['id', 'DESC'],
+      ],
     });
-    product.map((data) => {
-      transaction.map((history) => {
-        if (history.id_product === data.id) {
-          return sellerTransaction.push(history);
-        }
-      });
-    });
-    if (!sellerTransaction) {
+    if (!transaction) {
       return responseHandler(res, 200, 'You have no transaction');
     }
     sellerTransaction.reverse();
-    return responseHandler(res, 200, 'Transaction list', sellerTransaction, null);
+    return responseHandler(res, 200, 'Transaction list', transaction, null);
   } catch (e) {
     return responseHandler(res, 400, 'Error', e, null);
   }
