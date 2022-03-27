@@ -35,7 +35,7 @@ exports.getCategoryById = async (req, res) => {
     let { limit, page } = req.query;
     limit = parseInt(limit, 10) || 5;
     page = parseInt(page, 10) || 1;
-    const url = `${APP_URL}/product?`;
+    const url = `${APP_URL}/product-category/${req.params.id_category}?`;
     const offset = (page - 1) * limit;
     const results = await ProductCategory.findAll({
       where: {

@@ -26,7 +26,7 @@ exports.getAllProduct = async (req, res) => {
   const setOrder = listOrder[orderBy - 1].split(' ');
   minPrice = parseInt(minPrice, 10) || 0;
   maxPrice = parseInt(maxPrice, 10) || 100000000;
-  limit = parseInt(limit, 10) || 10;
+  limit = parseInt(limit, 10) || 12;
   page = parseInt(page, 10) || 1;
   const dataName = ['search', 'minPrice', 'maxPrice'];
   const data = { search, minPrice, maxPrice };
