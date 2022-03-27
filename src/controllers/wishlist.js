@@ -17,7 +17,8 @@ exports.getAllWishlists = async (req, res) => {
         },
         {
           model: Product,
-          attributes: ['name'],
+          attributes: ['name', 'stock', 'price'],
+          include: [ProductImage],
         },
       ],
     });
@@ -42,7 +43,7 @@ exports.detailWishlist = async (req, res) => {
       },
       {
         model: Product,
-        attributes: ['id', 'name', 'stock', 'price'],
+        attributes: ['name', 'stock', 'price'],
         include: [ProductImage],
       },
     ],
@@ -68,7 +69,8 @@ exports.getWishlistsByProduct = async (req, res) => {
         },
         {
           model: Product,
-          attributes: ['name'],
+          attributes: ['name', 'stock', 'price'],
+          include: [ProductImage],
         },
       ],
     });
@@ -97,11 +99,47 @@ exports.getWishlistsByUser = async (req, res) => {
         },
         {
           model: Product,
-          attributes: ['name'],
+          attributes: ['name', 'stock', 'price'],
+          include: [ProductImage],
         },
       ],
     });
     return responseHandler(res, 200, `List wishlists in User ${idUser}`, results);
+  } catch (e) {
+    let error = e.message;
+    if (Array.isArray(e.errors)) {
+      error = e.errors.map((err) => ({ field: err.path, message: err.message }));
+    }
+    return responseHandler(res, 400, 'error', error);
+  }
+};
+
+exports.checkWishlist = async (req, res) => {
+  try {
+    const idUser = req.user.id;
+    const { idProduct } = req.params;
+    const results = await Wishlist.findAll({
+      where: {
+        id_user: idUser,
+        id_product: idProduct,
+      },
+      attributes: ['id', 'id_user', 'id_product'],
+      include: [
+        {
+          model: User,
+          attributes: ['name'],
+        },
+        {
+          model: Product,
+          attributes: ['name', 'stock', 'price'],
+          include: [ProductImage],
+        },
+      ],
+    });
+    if (results.length > 0) {
+      return responseHandler(res, 200, `Wishlist with User ${idUser} and product ${idProduct} is found`, results);
+    }
+    return responseHandler(res, 200, `Wishlist with User ${idUser} and product ${idProduct} is not found`, results);
   } catch (e) {
     let error = e.message;
     if (Array.isArray(e.errors)) {
