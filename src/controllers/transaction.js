@@ -132,6 +132,9 @@ exports.getUserCart = async (req, res) => {
       currentPage: page,
       lastPage: last,
     };
+    if (transaction.length === 1) {
+      return responseHandler(res, 200, 'List of all transaction', [transaction], pageInfo);
+    }
     return responseHandler(res, 200, 'List of all transactions', transaction, pageInfo);
   } catch (e) {
     return responseHandler(res, 500, 'Error', e, null);
@@ -255,7 +258,7 @@ exports.deleteTransaction = async (req, res) => {
     if (!transaction || transaction.dataValues.is_deleted) {
       return responseHandler(res, 404, 'Data not found', null, null);
     }
-    if (transaction.id_transaction_status < 5 || transaction.id_transaction_status < 1) {
+    if (transaction.id_transaction_status < 5 && transaction.id_transaction_status > 1) {
       return responseHandler(res, 400, 'You haven\'t finish or cancel your transaction.');
     }
     transaction.is_deleted = 1;

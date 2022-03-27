@@ -283,7 +283,6 @@ exports.productDetail = async (req, res) => {
     }
     return responseHandler(res, 404, 'Product not found', null, null);
   } catch (e) {
-    console.log(e);
     return responseHandler(res, 500, 'Unexpected error');
   }
 };

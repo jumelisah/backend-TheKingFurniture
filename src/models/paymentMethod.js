@@ -14,6 +14,9 @@ const PaymentMethod = sequelize.define('payment_method', {
       },
     },
   },
+  image: {
+    type: Sequelize.STRING,
+  },
 });
 
 module.exports = PaymentMethod;
