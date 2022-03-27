@@ -47,6 +47,10 @@ const Transaction = sequelize.define('transaction', {
       },
     },
   },
+  phone_number: {
+    type: Sequelize.STRING,
+    allowNull: true,
+  },
   id_payment_method: {
     type: Sequelize.INTEGER,
     defaultValue: 1,
