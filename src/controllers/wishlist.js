@@ -4,6 +4,7 @@ const { inputValidator } = require('../helpers/validator');
 const Product = require('../models/product');
 const Wishlist = require('../models/wishlist');
 const User = require('../models/user');
+const ProductImage = require('../models/productImage');
 
 exports.getAllWishlists = async (req, res) => {
   try {
@@ -41,7 +42,8 @@ exports.detailWishlist = async (req, res) => {
       },
       {
         model: Product,
-        attributes: ['name'],
+        attributes: ['id', 'name', 'stock', 'price'],
+        include: [ProductImage],
       },
     ],
   });
