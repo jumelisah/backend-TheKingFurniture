@@ -26,7 +26,7 @@ exports.getAllProduct = async (req, res) => {
   const setOrder = listOrder[orderBy - 1].split(' ');
   minPrice = parseInt(minPrice, 10) || 0;
   maxPrice = parseInt(maxPrice, 10) || 100000000;
-  limit = parseInt(limit, 10) || 12;
+  limit = parseInt(limit, 10) || 16;
   page = parseInt(page, 10) || 1;
   const dataName = ['search', 'minPrice', 'maxPrice'];
   const data = { search, minPrice, maxPrice };
@@ -76,6 +76,9 @@ exports.getAllProduct = async (req, res) => {
       price: {
         [Sequelize.Op.gte]: minPrice,
         [Sequelize.Op.lte]: maxPrice,
+      },
+      stock: {
+        [Sequelize.Op.gte]: 1,
       },
       is_deleted: 0,
     },
@@ -318,7 +321,7 @@ exports.createProduct = async (req, res) => {
         const productImage = await ProductImage.create(data);
         if (!productImage) {
           deleteImages(req.files);
-          return responseHandler(res, 400, 'Cant upload image', null, null);
+          // return responseHandler(res, 400, 'Cant upload image', null, null);
         }
       });
     }
