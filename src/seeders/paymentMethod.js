@@ -8,6 +8,10 @@ const paymentMethods = async () => {
       name: 'Cash',
       image: null,
     },
+    {
+      name: 'QR Code',
+      image: null,
+    },
   ];
   if (paymentMethod.length === 0) {
     await PaymentMethod.bulkCreate(seedPayment);

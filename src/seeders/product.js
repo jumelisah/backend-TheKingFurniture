@@ -15,7 +15,7 @@ const products = async () => {
     },
   ];
   if (product.length === 0) {
-    await Product.bulkCreate(seedProduct);
+    await Product.create(seedProduct);
   }
 };
 

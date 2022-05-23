@@ -8,6 +8,10 @@ const colors = async () => {
       name: 'Black',
       code: '#000000',
     },
+    {
+      name: 'White',
+      code: '#fff',
+    },
   ];
   if (color.length === 0) {
     await Color.bulkCreate(seedColor);
