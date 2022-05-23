@@ -20,6 +20,10 @@ app.listen(APP_PORT, async () => {
   await sequelize.sync();
   await seeders.roles();
   await seeders.users();
+  await seeders.products();
   await seeders.categories();
   await seeders.transactionStatuses();
+  await seeders.colors();
+  await seeders.deliveryMethods();
+  await seeders.paymentMethods();
 });
