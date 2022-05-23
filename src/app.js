@@ -2,8 +2,9 @@ const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
 const sequelize = require('./helpers/sequelize');
+const seeders = require('./seeders');
 
-const { PORT } = process.env;
+// const { PORT } = process.env;
 
 const app = express();
 
@@ -13,7 +14,16 @@ app.use(morgan('dev'));
 
 app.use('/', require('./routes'));
 
-app.listen(PORT, () => {
-  console.log(`App listening on port ${PORT}`);
-  sequelize.sync();
+const APP_PORT = process.env.PORT || 5000;
+
+app.listen(APP_PORT, async () => {
+  await sequelize.sync();
+  await seeders.roles();
+  await seeders.users();
+  await seeders.products();
+  await seeders.categories();
+  await seeders.transactionStatuses();
+  await seeders.colors();
+  await seeders.deliveryMethods();
+  await seeders.paymentMethods();
 });
