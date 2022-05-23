@@ -72,7 +72,7 @@ const Transaction = sequelize.define('transaction', {
   },
   is_deleted: {
     type: Sequelize.BOOLEAN,
-    defaultValue: 0,
+    defaultValue: false,
   },
 });
 

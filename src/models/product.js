@@ -83,7 +83,7 @@ const Product = sequelize.define('product', {
   },
   is_deleted: {
     type: Sequelize.BOOLEAN,
-    defaultValue: 0,
+    defaultValue: false,
   },
 });
 
